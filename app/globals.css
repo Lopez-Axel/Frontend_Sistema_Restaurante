@@ -1,26 +1,182 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-hub-black: #02010a;
+  --color-hub-prussian: #04052e;
+  --color-hub-twilight: #140152;
+  --color-hub-navy: #22007c;
+  --color-hub-electric: #0d00a4;
+
+  --color-hub-electric-soft: #4f3bff;
+  --color-hub-line: #241f52;
+  --color-hub-mist: #a6aed6;
+  --color-hub-white: #ffffff;
+
+  --color-hub-neon-green: #00e676;
+  --color-hub-neon-red: #ff3b5c;
+
+  --animate-mascot: hub-mascot-float 6s ease-in-out infinite,
+    hub-mascot-glow 4.5s ease-in-out infinite;
 }
 
 @theme inline {
+  --font-sans: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plus-jakarta-sans), ui-monospace, SFMono-Regular, monospace;
+  --font-heading: var(--font-playfair-display), Georgia, serif;
+  --font-title: var(--font-playfair-display), Georgia, serif;
+  --font-subtitle: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
+
   --color-background: var(--background);
+  --color-background-light: var(--background-light);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-title: var(--title);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: var(--color-hub-black);
+  --background-light: var(--color-hub-prussian);
+  --foreground: var(--color-hub-white);
+  --title: var(--color-hub-white);
+
+  --card: var(--color-hub-twilight);
+  --card-foreground: var(--color-hub-white);
+  --popover: var(--color-hub-twilight);
+  --popover-foreground: var(--color-hub-white);
+
+  --primary: var(--color-hub-electric-soft);
+  --primary-foreground: var(--color-hub-white);
+  --secondary: var(--color-hub-prussian);
+  --secondary-foreground: var(--color-hub-white);
+  --accent: var(--color-hub-navy);
+  --accent-foreground: var(--color-hub-white);
+  --muted: var(--color-hub-prussian);
+  --muted-foreground: var(--color-hub-mist);
+
+  --destructive: var(--color-hub-neon-red);
+  --destructive-foreground: var(--color-hub-white);
+
+  --border: var(--color-hub-line);
+  --input: var(--color-hub-line);
+  --ring: var(--color-hub-electric-soft);
+  --radius: 0.5rem;
+
+  --chart-1: var(--color-hub-electric-soft);
+  --chart-2: var(--color-hub-neon-green);
+  --chart-3: var(--color-hub-neon-red);
+  --chart-4: var(--color-hub-mist);
+  --chart-5: var(--color-hub-navy);
+
+  --sidebar: var(--color-hub-prussian);
+  --sidebar-foreground: var(--color-hub-white);
+  --sidebar-primary: var(--color-hub-electric-soft);
+  --sidebar-primary-foreground: var(--color-hub-white);
+  --sidebar-accent: var(--color-hub-electric-soft);
+  --sidebar-accent-foreground: var(--color-hub-white);
+  --sidebar-border: var(--color-hub-line);
+  --sidebar-ring: var(--color-hub-electric-soft);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  ::selection {
+    background-color: var(--color-hub-electric-soft);
+    color: var(--color-hub-white);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .scrollbar-hub {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-hub-electric-soft) transparent;
+  }
+  .scrollbar-hub::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  .scrollbar-hub::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-hub::-webkit-scrollbar-thumb {
+    background-color: var(--color-hub-electric-soft);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: padding-box;
+  }
+  .scrollbar-hub::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-hub-mist);
+  }
+}
+
+@keyframes hub-mascot-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(-2deg);
+  }
+}
+
+@keyframes hub-mascot-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgb(79 59 255 / 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgb(0 230 118 / 0.45));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-mascot {
+    animation: none;
+  }
 }
