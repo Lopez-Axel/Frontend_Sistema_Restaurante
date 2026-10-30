@@ -5,7 +5,7 @@ import { Calendar, FolderTree, Pencil, Plus, Trash2, User } from "lucide-react";
 import robotCategoria from "@/public/robot_categoria.png";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Mascot } from "@/components/brand/mascot";
+import { Footer, type FooterTip } from "@/components/layout/Footer";
 import { CategoryFormDialog } from "@/components/categories/category-form-dialog";
 import { ConfirmDialog } from "@/components/tables/confirm-dialog";
 import {
@@ -45,8 +45,6 @@ function getUserName(user: unknown): string | null {
   return null;
 }
 
-const MASCOT_CLASS = "-scale-x-100 size-10 shrink-0 sm:size-12 lg:size-14";
-
 export default function CategoriasPage() {
   const user = useAuthStore((s) => s.user);
   const isAdmin = user?.role === "ADMIN";
@@ -59,6 +57,40 @@ export default function CategoriasPage() {
   const [deleting, setDeleting] = useState<CategoryDTO | undefined>(undefined);
 
   const categories = categoriesQuery.data ?? [];
+
+  const footerHint = isAdmin
+    ? "Como administrador puedes crear categorías y usar los íconos de lápiz o papelera de cada tarjeta para editarlas o eliminarlas. Las categorías inactivas dejan de mostrarse al crear o editar platos."
+    : "Puedes consultar las categorías y su estado. Solo los administradores pueden crear, editar o eliminar categorías.";
+
+  const footerTips: FooterTip[] = isAdmin
+    ? [
+        {
+          icon: Plus,
+          text: "Crea una categoría nueva con el botón «Nueva categoría».",
+        },
+        {
+          icon: Pencil,
+          text: "Edita el nombre o la disponibilidad desde el ícono de lápiz.",
+        },
+        {
+          icon: Trash2,
+          text: "Elimina una categoría con el ícono de papelera; no se puede deshacer.",
+        },
+      ]
+    : [
+        {
+          icon: FolderTree,
+          text: "Cada tarjeta agrupa los platos que comparten un mismo tipo.",
+        },
+        {
+          icon: Calendar,
+          text: "La tarjeta indica cuándo se creó y su última modificación.",
+        },
+        {
+          icon: User,
+          text: "También muestra quién registró y quién actualizó la categoría.",
+        },
+      ];
 
   function openCreate() {
     setEditing(undefined);
@@ -97,157 +129,168 @@ export default function CategoriasPage() {
         )}
       </header>
 
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
-        <Mascot src={robotCategoria} className={MASCOT_CLASS} />
-
-        <div className="@container min-w-0 flex-1">
-          {categoriesQuery.isLoading && (
-            <div className="grid gap-4 @sm:grid-cols-2 @3xl:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <Card
-                  key={index}
-                  className="animate-pulse bg-card py-0 ring-1 ring-border"
-                >
-                  <CardContent className="space-y-4 p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="h-5 w-40 rounded bg-muted" />
-                      <div className="h-5 w-20 rounded-full bg-muted" />
+      <div className="@container min-w-0">
+        {categoriesQuery.isLoading && (
+          <div className="grid gap-4 @sm:grid-cols-2 @3xl:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Card
+                key={index}
+                className="animate-pulse bg-card py-0 ring-1 ring-border"
+              >
+                <CardContent className="space-y-4 p-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-xl bg-muted" />
+                      <div className="h-5 w-32 rounded bg-muted" />
                     </div>
-                    <div className="space-y-2">
-                      <div className="h-4 w-52 rounded bg-muted" />
-                      <div className="h-4 w-48 rounded bg-muted" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                    <div className="h-5 w-20 rounded-full bg-muted" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-4 w-52 rounded bg-muted" />
+                    <div className="h-4 w-48 rounded bg-muted" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
-          {!categoriesQuery.isLoading && categories.length === 0 && (
-            <Card className="bg-card py-0 ring-1 ring-border">
-              <CardContent className="flex flex-col items-center justify-center py-14 text-center">
-                <span className="flex size-12 items-center justify-center rounded-full bg-primary/15">
-                  <FolderTree className="size-6 text-hub-electric-soft" />
-                </span>
-                <p className="mt-4 font-medium text-foreground">
-                  No hay categorías registradas
+        {!categoriesQuery.isLoading && categories.length === 0 && (
+          <Card className="bg-card py-0 ring-1 ring-border">
+            <CardContent className="flex flex-col items-center justify-center py-14 text-center">
+              <span className="flex size-12 items-center justify-center rounded-full bg-primary/15">
+                <FolderTree className="size-6 text-hub-electric-soft" />
+              </span>
+              <p className="mt-4 font-medium text-foreground">
+                No hay categorías registradas
+              </p>
+              {isAdmin && (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Crea la primera categoría para agrupar tus platos.
                 </p>
-                {isAdmin && (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Crea la primera categoría para agrupar tus platos.
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-          {!categoriesQuery.isLoading && categories.length > 0 && (
-            <div className="grid gap-4 @sm:grid-cols-2 @3xl:grid-cols-3">
-              {categories.map((category) => {
-                const createdByName = getUserName(category.createdBy);
-                const updatedByName = getUserName(category.updatedBy);
-                const createdAt = formatDate(category.createdAt);
-                const updatedAt = formatDate(category.updatedAt);
-                const showUpdated = updatedAt && updatedAt !== createdAt;
+        {!categoriesQuery.isLoading && categories.length > 0 && (
+          <div className="grid gap-4 @sm:grid-cols-2 @3xl:grid-cols-3">
+            {categories.map((category) => {
+              const createdByName = getUserName(category.createdBy);
+              const updatedByName = getUserName(category.updatedBy);
+              const createdAt = formatDate(category.createdAt);
+              const updatedAt = formatDate(category.updatedAt);
+              const showUpdated = updatedAt && updatedAt !== createdAt;
 
-                return (
-                  <Card
-                    key={category.id}
-                    className="flex flex-col bg-card py-0 ring-1 ring-border transition-colors hover:ring-primary/50"
-                  >
-                    <CardContent className="flex flex-1 flex-col gap-4 p-5">
-                      <div className="flex items-start justify-between gap-4">
+              return (
+                <Card
+                  key={category.id}
+                  className="flex flex-col bg-card py-0 ring-1 ring-border transition-colors hover:ring-primary/50"
+                >
+                  <CardContent className="flex flex-1 flex-col gap-4 p-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/30">
+                          <FolderTree className="size-5 text-hub-electric-soft" />
+                        </span>
                         <h2 className="font-title text-xl font-semibold text-foreground">
                           {category.name}
                         </h2>
-                        <span
-                          className={cn(
-                            "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
-                            category.available === false
-                              ? "bg-muted text-muted-foreground"
-                              : "bg-hub-neon-green/15 text-hub-neon-green"
-                          )}
-                        >
-                          <span className="size-1.5 rounded-full bg-current" />
-                          {category.available === false ? "Inactiva" : "Activa"}
-                        </span>
                       </div>
+                      <span
+                        className={cn(
+                          "inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold",
+                          category.available === false
+                            ? "bg-muted text-muted-foreground"
+                            : "bg-hub-neon-green/15 text-hub-neon-green"
+                        )}
+                      >
+                        <span className="size-1.5 rounded-full bg-current" />
+                        {category.available === false ? "Inactiva" : "Activa"}
+                      </span>
+                    </div>
 
-                      <div className="space-y-2 text-sm text-muted-foreground">
-                        {createdByName && (
-                          <div className="flex items-center gap-2">
-                            <User className="size-4 shrink-0" />
-                            <span className="truncate">
-                              Creada por{" "}
-                              <span className="font-medium text-foreground">
-                                {createdByName}
-                              </span>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      {createdByName && (
+                        <div className="flex items-center gap-2">
+                          <User className="size-4 shrink-0" />
+                          <span className="truncate">
+                            Creada por{" "}
+                            <span className="font-medium text-foreground">
+                              {createdByName}
                             </span>
-                          </div>
-                        )}
-                        {createdAt && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className="size-4 shrink-0" />
-                            <span>
-                              Creada el{" "}
-                              <span className="font-medium text-foreground">
-                                {createdAt}
-                              </span>
-                            </span>
-                          </div>
-                        )}
-                        {showUpdated && (
-                          <div className="flex items-center gap-2">
-                            <Calendar className="size-4 shrink-0" />
-                            <span>
-                              Última modificación{" "}
-                              {updatedByName ? (
-                                <>
-                                  por{" "}
-                                  <span className="font-medium text-foreground">
-                                    {updatedByName}
-                                  </span>{" "}
-                                </>
-                              ) : null}
-                              el{" "}
-                              <span className="font-medium text-foreground">
-                                {updatedAt}
-                              </span>
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {isAdmin && (
-                        <div className="mt-auto flex justify-end gap-1 pt-2">
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label="Editar categoría"
-                            onClick={() => openEdit(category)}
-                            className="text-hub-electric-soft hover:bg-primary/15 hover:text-hub-electric-soft"
-                          >
-                            <Pencil />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label="Eliminar categoría"
-                            onClick={() => setDeleting(category)}
-                            className="text-hub-neon-red hover:bg-hub-neon-red/10 hover:text-hub-neon-red"
-                          >
-                            <Trash2 />
-                          </Button>
+                          </span>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </div>
+                      {createdAt && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="size-4 shrink-0" />
+                          <span>
+                            Creada el{" "}
+                            <span className="font-medium text-foreground">
+                              {createdAt}
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                      {showUpdated && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="size-4 shrink-0" />
+                          <span>
+                            Última modificación{" "}
+                            {updatedByName ? (
+                              <>
+                                por{" "}
+                                <span className="font-medium text-foreground">
+                                  {updatedByName}
+                                </span>{" "}
+                              </>
+                            ) : null}
+                            el{" "}
+                            <span className="font-medium text-foreground">
+                              {updatedAt}
+                            </span>
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {isAdmin && (
+                      <div className="mt-auto flex justify-end gap-1 pt-2">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Editar categoría"
+                          onClick={() => openEdit(category)}
+                          className="text-hub-electric-soft hover:bg-primary/15 hover:text-hub-electric-soft"
+                        >
+                          <Pencil />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          aria-label="Eliminar categoría"
+                          onClick={() => setDeleting(category)}
+                          className="text-hub-neon-red hover:bg-hub-neon-red/10 hover:text-hub-neon-red"
+                        >
+                          <Trash2 />
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      <Footer
+        images={robotCategoria}
+        description="Cada tarjeta representa una categoría que agrupa platos por tipo. El buscador de platos y menús usa estas categorías, así que mantenerlas actualizadas facilita organizar la carta."
+        hint={footerHint}
+        tips={footerTips}
+      />
 
       <CategoryFormDialog
         open={formOpen}

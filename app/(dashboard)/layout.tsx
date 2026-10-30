@@ -70,7 +70,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: "Menú",
     items: [
       { href: "/platos", label: "Platos", icon: ChefHat, roles: ALL_ROLES },
-      { href: "/menus", label: "Menús", icon: FolderTree, roles: ["ADMIN"] },
+      { href: "/menus", label: "Menús", icon: FolderTree, roles: ["ADMIN", "WAITER"] },
       { href: "/categorias", label: "Categorías", icon: FolderTree, roles: ["ADMIN"] },
       { href: "/ingredientes", label: "Ingredientes", icon: Boxes, roles: ["CHEF", "ADMIN"] },
       { href: "/unidades-medida", label: "Unidades de medida", icon: Ruler, roles: ["ADMIN"] },

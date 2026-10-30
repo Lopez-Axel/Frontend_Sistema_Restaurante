@@ -3,8 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDraggable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import { Armchair, GripVertical, Users } from "lucide-react";
+import { Armchair, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { StatusChip } from "@/components/tables/status-chip";
 import { useTableSeats, useUpdateSeat } from "@/lib/hooks/useTables";
@@ -20,39 +19,29 @@ interface TableCardProps {
   table: RestaurantTableResponse;
   statuses: TableStatus[];
   viewOnly?: boolean;
-  dragHandle?: React.ReactNode;
 }
 
-export function TableCard({
-  table,
-  statuses,
-  viewOnly,
-  dragHandle,
-}: TableCardProps) {
+export function TableCard({ table, statuses, viewOnly }: TableCardProps) {
   const statusColors = usePreferencesStore((s) => s.statusColors);
   const [seatsOpen, setSeatsOpen] = useState(false);
 
-  const seatsQuery = useTableSeats(stringOrEmpty(table.id));
-  const updateSeat = useUpdateSeat(stringOrEmpty(table.id));
+  const seatsQuery = useTableSeats(table.id ?? "");
+  const updateSeat = useUpdateSeat(table.id ?? "");
 
   const ui = resolveTableStatus(table.status, statuses, statusColors);
   const showSeats = !viewOnly && !!table.id;
   const seats = seatsQuery.data ?? [];
 
-  function submitSeat(seatId: string, occupied: boolean) {
-    updateSeat.mutate({ seatId, occupied });
-  }
-
   return (
     <Card
-      className="gap-0 rounded-xl py-0 shadow-sm"
+      className="gap-0 rounded-xl bg-background py-0 shadow-sm ring-1 ring-border transition-colors hover:ring-primary/50"
       style={{ borderLeftColor: ui.color, borderLeftWidth: 3 }}
     >
-      <div className="flex items-center gap-1.5 p-2">
-        {dragHandle}
+      <div className="flex items-center gap-2 p-3">
         <Link
           href={`/mesas/${table.id}`}
-          className="group flex min-w-0 flex-1 items-center justify-between gap-2"
+          draggable={false}
+          className="flex min-w-0 flex-1 items-center justify-between gap-2"
         >
           <span className="min-w-0">
             <span className="block truncate font-subtitle text-base leading-tight font-bold text-foreground">
@@ -83,9 +72,11 @@ export function TableCard({
         )}
       </div>
       {seatsOpen && (
-        <CardContent className="border-t px-2.5 py-2">
+        <CardContent className="border-t px-3 py-2">
           {seatsQuery.isFetching && seats.length === 0 ? (
-            <p className="py-1 text-xs text-muted-foreground">Cargando sillas...</p>
+            <p className="py-1 text-xs text-muted-foreground">
+              Cargando sillas...
+            </p>
           ) : seats.length === 0 ? (
             <p className="py-1 text-xs text-muted-foreground">
               Sin sillas registradas.
@@ -99,7 +90,12 @@ export function TableCard({
                     key={seat.id}
                     type="button"
                     aria-label={`Silla ${seat.number}${occupied ? " ocupada" : " libre"}`}
-                    onClick={() => submitSeat(seat.id ?? "", !occupied)}
+                    onClick={() =>
+                      updateSeat.mutate({
+                        seatId: seat.id ?? "",
+                        occupied: !occupied,
+                      })
+                    }
                     disabled={!seat.id || updateSeat.isPending}
                     className={cn(
                       "flex size-7 items-center justify-center rounded-md border text-xs font-medium transition-colors",
@@ -120,36 +116,22 @@ export function TableCard({
   );
 }
 
-function stringOrEmpty(id: string | undefined): string {
-  return id ?? "";
-}
-
 export function DraggableTableCard(props: TableCardProps) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, isDragging } =
-    useDraggable({
-      id: props.table.id ?? props.table.number?.toString() ?? "table",
-    });
-
-  const handle = (
-    <button
-      ref={setActivatorNodeRef}
-      type="button"
-      aria-label="Arrastrar mesa a otro estado"
-      {...attributes}
-      {...listeners}
-      className="flex size-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:cursor-grabbing"
-    >
-      <GripVertical className="size-4" />
-    </button>
-  );
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: props.table.id ?? props.table.number?.toString() ?? "table",
+  });
 
   return (
     <div
       ref={setNodeRef}
-      style={{ transform: CSS.Translate.toString(transform), opacity: isDragging ? 0.4 : 1 }}
-      className={cn(isDragging && "cursor-grabbing")}
+      {...attributes}
+      {...listeners}
+      className={cn(
+        "cursor-grab outline-none active:cursor-grabbing",
+        isDragging && "opacity-40"
+      )}
     >
-      <TableCard {...props} dragHandle={handle} />
+      <TableCard {...props} />
     </div>
   );
 }
